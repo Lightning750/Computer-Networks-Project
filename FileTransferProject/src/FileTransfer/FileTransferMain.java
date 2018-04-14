@@ -39,23 +39,23 @@ public class FileTransferMain {
 			System.out.print("Enter 1 for Client or 2 for Server: ");
 			userPrompt = input.nextInt();
 			if (userPrompt == 1){
-				if (userPrompt == 1){
-					System.out.println("You have selected Client" );
-					client();
-					return;
-				}
-				else if (userPrompt == 2){
-					System.out.println("You have selected Server");
-					server();
-					return;
-				}
-				else{
-					System.out.println("You have not selected a valid response" );
-					userPrompt = 0;
-				}
+				System.out.println("You have selected Client" );
+				client();
+				return;
+			}
+			else if (userPrompt == 2){
+				System.out.println("You have selected Server");
+				server();
+				return;
+			}
+			else{
+				System.out.println("You have not selected a valid response" );
+				userPrompt = 0;
 			}
 		}
+		input.close();
 	}
+	
 	public static void server() throws IOException {
 		FileTransferServer server;
 		switch(protocol) {
@@ -65,9 +65,16 @@ public class FileTransferMain {
 		case TCP:
 		default:
 			server = new FileTransferServer(protocol, Network.TCP_PORT);
+			break;
 		}
-
+		System.out.print("Enter any key if you are ready to start the connection: ");
+		Scanner connection = new Scanner(System.in);
+		while(!connection.hasNext());
+		System.out.println("Connecting...");
+		server.acceptConnection();
+		System.out.println("Connection confirmed");
 	}
+	
 	public static void client() throws IOException {
 		FileTransferClient client;
 		switch(protocol) {
