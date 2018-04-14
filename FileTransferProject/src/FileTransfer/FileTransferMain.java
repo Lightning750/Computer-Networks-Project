@@ -23,12 +23,10 @@ public class FileTransferMain {
 			x = input.nextInt();
 
 			if (x == 1){
-
 				System.out.println("You have selected UDP" );
 				protocol = Network.Protocol.UDP;
 			}
 			else if (x == 2){
-
 				System.out.println("You have selected TCP");
 				protocol = Network.Protocol.TCP;
 			}
@@ -43,16 +41,17 @@ public class FileTransferMain {
 			System.out.println("Would you like to be the client or server?");
 			System.out.print("Enter 1 for Client or 2 for Server: ");
 
-
 			y = input.nextInt();
 
 			if (y == 1){
-
 				System.out.println("You have selected Client" );
+				server();
+				return;
 			}
 			else if (y == 2){
-
 				System.out.println("You have selected Server");
+				client();
+				return;
 			}
 			else{
 				System.out.println("You have not selected a valid response" );
@@ -61,5 +60,30 @@ public class FileTransferMain {
 		}
 		
 	}
+	public static void server() throws IOException {
+		FileTransferServer server;
+		switch(protocol) {
+		case UDP:
+			server = new FileTransferServer(protocol, Network.UDP_PORT);
+			break;
+		case TCP:
+		default:
+			server = new FileTransferServer(protocol, Network.TCP_PORT);
+		}
 
+	}
+	
+	public static void client() throws IOException {
+		FileTransferClient client;
+		switch(protocol) {
+		case UDP:
+			client = new FileTransferClient(protocol, Network.UDP_PORT);
+			break;
+		case TCP:
+		default:
+			client = new FileTransferClient(protocol, Network.TCP_PORT);
+		}
+		
+		
+	}
 }
