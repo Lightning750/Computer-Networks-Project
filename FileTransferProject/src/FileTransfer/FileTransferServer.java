@@ -1,42 +1,59 @@
 package FileTransfer;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
-import java.io.File;
-import java.lang.System;
-import java.net.*;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 
 public class FileTransferServer {
-	private PipedOutputStream writeBufferOut,readBufferOut;
-	private PipedInputStream writeBufferIn,readBufferIn;
-	private DatagramSocket UDP_Socket;
-	private ServerSocket TCP_Socket;
 	private Network.Protocol protocol; 
-	
-	public FileTransferServer(Network.Protocol p) throws IOException {
-		this(16384, 2048, p);
-	}
+	private DatagramSocket UDP_Socket;
+	private ServerSocket TCP_ServerSocket;
+	private Socket TCP_Socket;
+	private int port;
+	private InetAddress clientIP;
+	private DataOutputStream writeBuffer;
+	private DataInputStream readBuffer;
 
-	FileTransferServer(int writeBufferSize, int readBufferSize, Network.Protocol p) throws IOException {
-		writeBufferOut = new PipedOutputStream(writeBufferIn);
-		writeBufferIn = new PipedInputStream(writeBufferOut, writeBufferSize);
-		readBufferOut = new PipedOutputStream(readBufferIn);
-		readBufferIn = new PipedInputStream(readBufferOut, readBufferSize);
+	FileTransferServer(Network.Protocol p, int port) throws IOException {
 		protocol = p;
-	}
-	
-	public void bind(int port) throws IOException {
+		this.port = port;
 		switch(protocol) {
 		case UDP:
 			UDP_Socket = new DatagramSocket(port);
 			break;
 		case TCP:
 		default:
-			TCP_Socket = new ServerSocket(port);
+			TCP_ServerSocket = new ServerSocket(port);
 			break;			
 		}
 	}
-		
+	
+	public void acceptConnection() throws IOException {
+		switch(protocol) {
+		case UDP:
+			UDP_Socket.setSoTimeout(Network.TIMEOUT);
+			byte[] connectionBuffer = null;
+			DatagramPacket connectionPacket = 
+					new DatagramPacket(connectionBuffer, 8);
+			UDP_Socket.receive(connectionPacket);
+			UDP_Socket.send(connectionPacket);
+			UDP_Socket.receive(connectionPacket);
+			clientIP = connectionPacket.getAddress();
+			break;
+		case TCP:
+		default:
+			TCP_ServerSocket.setSoTimeout(Network.TIMEOUT);
+			TCP_Socket = TCP_ServerSocket.accept();
+			clientIP = TCP_Socket.getInetAddress();
+			writeBuffer = new DataOutputStream(TCP_Socket.getOutputStream());
+			readBuffer = new DataInputStream(TCP_Socket.getInputStream());
+			break;
+		}
+	}
 }
 
