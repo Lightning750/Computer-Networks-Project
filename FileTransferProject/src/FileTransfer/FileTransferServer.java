@@ -55,5 +55,17 @@ public class FileTransferServer {
 			break;
 		}
 	}
+	public void sendBytes(byte[] byteArray) throws IOException {
+		
+	}
+	public void sendString(String message)throws IOException {
+		
+	}
+	public byte[] receiveBytes() throws IOException {
+		
+	}
+	public String receiveString() throws IOException {
+		
+	}
 }
 
