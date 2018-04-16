@@ -109,7 +109,15 @@ public class FileTransferMain {
 		}
 		else
 		{
-			// todo
+			//TODO
+			
 		}
+		int fileLength = client.receiveInt();
+		int lastPacket = fileLength % Network.PACKET_SIZE;
+		for (int i=0; i<fileLength; i+=1000)
+		{
+			client.receiveBytes(Network.PACKET_SIZE);
+		}
+		client.receiveBytes(lastPacket);
 	}
 }
