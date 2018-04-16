@@ -55,15 +55,63 @@ public class FileTransferClient {
 	}
 	
 	public void sendBytes(byte[] byteArray) throws IOException {
-
+		switch(protocol) {
+		case UDP:
+			
+			break;
+		case TCP:
+		default:
+			writeBuffer.writeInt(byteArray.length);
+			writeBuffer.write(byteArray);
+			break;			
+		}
 	}
+	
 	public void sendString(String message)throws IOException {
-
+		switch(protocol) {
+		case UDP:
+			
+			break;
+		case TCP:
+		default:
+			writeBuffer.writeChars(message);
+			break;			
+		}
 	}
-	public byte[] receiveBytes() throws IOException {
-
+	
+	public int receiveInt() throws IOException {
+		int data = 0;
+		switch(protocol) {
+		case UDP:
+			return data;
+		case TCP:
+		default:
+			readBuffer.readInt();
+			return data;	
+		}
 	}
+	
+	public byte[] receiveBytes(int length) throws IOException {
+		byte[] byteArray = { 0 };
+		switch(protocol) {
+		case UDP:
+			return byteArray;
+		case TCP:
+		default:
+			readBuffer.readFully(byteArray, 0, length);
+			return byteArray;		
+		}
+	}
+	
 	public String receiveString() throws IOException {
-
+		String string = null;
+		switch(protocol) {
+		case UDP:
+			return string;
+		case TCP:
+		default:
+			string = readBuffer.readUTF();
+			return string	;		
+		}
 	}
 }
