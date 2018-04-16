@@ -54,6 +54,18 @@ public class FileTransferClient {
 		}
 	}
 	
+	public void sendInt(int data) throws IOException {
+		switch(protocol) {
+		case UDP:
+			
+			break;
+		case TCP:
+		default:
+			writeBuffer.writeInt(data);
+			break;
+		}
+	}
+	
 	public void sendBytes(byte[] byteArray) throws IOException {
 		switch(protocol) {
 		case UDP:
