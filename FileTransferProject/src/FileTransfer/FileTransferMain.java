@@ -9,13 +9,13 @@ public class FileTransferMain {
 	private static Network.Protocol protocol;
 
 	public static void main(String[] args) throws IOException {
-		
+
 		//Displays IP Address
-        InetAddress inetAddress = InetAddress.getLocalHost();
-        System.out.println("IP Address:- " + inetAddress.getHostAddress());
-        System.out.println("Host Name:- " + inetAddress.getHostName());
-        
-        
+		InetAddress inetAddress = InetAddress.getLocalHost();
+		System.out.println("IP Address:- " + inetAddress.getHostAddress());
+		System.out.println("Host Name:- " + inetAddress.getHostName());
+
+
 		Scanner input = new Scanner(System.in);
 		int userPrompt = 0;
 		while (userPrompt == 0){
@@ -63,7 +63,7 @@ public class FileTransferMain {
 		}
 		input.close();
 	}
-	
+
 	public static void server() throws IOException {
 		FileTransferServer server;
 		switch(protocol) {
@@ -81,10 +81,9 @@ public class FileTransferMain {
 		System.out.println("Connecting...");
 		server.acceptConnection();
 		System.out.println("Connection confirmed");
-		
-		
+		server.receiveString();
 	}
-	
+
 	public static void client() throws IOException {
 		FileTransferClient client;
 		switch(protocol) {
@@ -98,10 +97,19 @@ public class FileTransferMain {
 		System.out.print("Enter the IP Address you would like to connect to: ");
 		Scanner IPConnect = new Scanner(System.in);
 		String IPAddress = IPConnect.nextLine();
-		InetAddress ServerAddress = InetAddress.getByName(IPAddress);
-		client.beginConnection(ServerAddress);		
+		InetAddress serverAddress = InetAddress.getByName(IPAddress);
+		client.beginConnection(serverAddress);		
 		Scanner FileName = new Scanner(System.in);
 		String File = FileName.nextLine();
 		client.sendString(File);
+		int ack = client.receiveInt();
+		if (ack ==1)
+		{
+			int CheckSum = client.receiveInt();
+		}
+		else
+		{
+			// todo
+		}
 	}
 }
