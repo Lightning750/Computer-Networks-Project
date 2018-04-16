@@ -81,6 +81,8 @@ public class FileTransferMain {
 		System.out.println("Connecting...");
 		server.acceptConnection();
 		System.out.println("Connection confirmed");
+		
+		
 	}
 	
 	public static void client() throws IOException {
@@ -97,6 +99,9 @@ public class FileTransferMain {
 		Scanner IPConnect = new Scanner(System.in);
 		String IPAddress = IPConnect.nextLine();
 		InetAddress ServerAddress = InetAddress.getByName(IPAddress);
-		client.beginConnection(ServerAddress);
+		client.beginConnection(ServerAddress);		
+		Scanner FileName = new Scanner(System.in);
+		String File = FileName.nextLine();
+		client.sendString(File);
 	}
 }
