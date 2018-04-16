@@ -2,12 +2,20 @@ package FileTransfer;
 
 import java.io.IOException;
 import java.util.Scanner;
+import java.net.InetAddress;
 
 public class FileTransferMain {
 
 	private static Network.Protocol protocol;
 
 	public static void main(String[] args) throws IOException {
+		
+		//Displays IP Address
+        InetAddress inetAddress = InetAddress.getLocalHost();
+        System.out.println("IP Address:- " + inetAddress.getHostAddress());
+        System.out.println("Host Name:- " + inetAddress.getHostName());
+        
+        
 		Scanner input = new Scanner(System.in);
 		int userPrompt = 0;
 		while (userPrompt == 0){
@@ -85,5 +93,10 @@ public class FileTransferMain {
 		default:
 			client = new FileTransferClient(protocol, Network.TCP_PORT);
 		}
+		System.out.print("Enter the IP Address you would like to connect to: ");
+		Scanner IPConnect = new Scanner(System.in);
+		String IPAddress = IPConnect.nextLine();
+		InetAddress ServerAddress = InetAddress.getByName(IPAddress);
+		client.beginConnection(ServerAddress);
 	}
 }
