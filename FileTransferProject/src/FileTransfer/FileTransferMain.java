@@ -98,8 +98,12 @@ public class FileTransferMain {
 		Scanner IPConnect = new Scanner(System.in);
 		String IPAddress = IPConnect.nextLine();
 		InetAddress serverAddress = InetAddress.getByName(IPAddress);
-		client.beginConnection(serverAddress);		
+		client.beginConnection(serverAddress);	
+		System.out.println("Connection confirmed");
+		
+		//Prompts user to enter file name. 
 		Scanner FileName = new Scanner(System.in);
+		System.out.print("Enter file name");
 		String File = FileName.nextLine();
 		client.sendString(File);
 		int ack = client.receiveInt();
