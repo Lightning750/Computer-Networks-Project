@@ -75,7 +75,7 @@ public class FileTransferMain {
 			server = new FileTransferServer(protocol, Network.TCP_PORT);
 			break;
 		}
-		System.out.print("Enter any key if you are ready to start the connection: ");
+		System.out.print("Enter any character if you are ready to start the connection: ");
 		Scanner connection = new Scanner(System.in);
 		while(!connection.hasNext());
 		System.out.println("Connecting...");
@@ -120,8 +120,8 @@ public class FileTransferMain {
 		int lastPacket = fileLength % Network.PACKET_SIZE;
 		for (int i=0; i<fileLength; i+=1000)
 		{
-			client.receiveBytes(Network.PACKET_SIZE);
+			client.receiveBytes();
 		}
-		client.receiveBytes(lastPacket);
+		client.receiveBytes();
 	}
 }
