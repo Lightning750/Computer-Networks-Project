@@ -103,13 +103,14 @@ public class FileTransferClient {
 		}
 	}
 	
-	public byte[] receiveBytes(int length) throws IOException {
+	public byte[] receiveBytes() throws IOException {
 		byte[] byteArray = { 0 };
 		switch(protocol) {
 		case UDP:
 			return byteArray;
 		case TCP:
 		default:
+			int length = receiveInt();
 			readBuffer.readFully(byteArray, 0, length);
 			return byteArray;		
 		}
