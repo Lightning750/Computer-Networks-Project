@@ -85,7 +85,13 @@ public class FileTransferMain {
 		System.out.println("Connecting...");
 		server.acceptConnection();
 		System.out.println("Connection confirmed");
-		server.receiveString();
+		
+		String fileName = server.receiveString();
+		File fileDataInput = new File(fileName);
+		if(!fileDataInput.exists()){
+			//TODO
+		}
+		//This is where file will split
 	}
 
 	public static void client() throws IOException {
