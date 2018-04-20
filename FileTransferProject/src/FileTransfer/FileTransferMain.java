@@ -87,11 +87,25 @@ public class FileTransferMain {
 		System.out.println("Connection confirmed");
 		
 		String fileName = server.receiveString();
-		File fileDataInput = new File(fileName);
-		if(!fileDataInput.exists()){
-			//TODO
+		File input = new File(fileName);
+		if(!input.exists()){
+			System.out.println("The file requested has been found");
+			String fileExists = "The file requested has been found";
+			server.sendString(fileExists);
 		}
 		//This is where file will split
+		FileInputStream fis = new FileInputStream(input);
+		byte[] byteArray = new byte[1024];
+		int bytesCount = 0;
+		
+		int packets = (int) Math.ceil(fis.available()/1024);
+		server.sendInt(packets);
+		
+		while ((bytesCount = fis.read(byteArray)) != -1) {
+			server.sendBytes(byteArray);
+		}
+		fis.close();
+		
 	}
 
 	public static void client() throws IOException {
@@ -146,6 +160,7 @@ public class FileTransferMain {
 			digest.update(byteArray, 0, bytesCount);
 		}
 		fis.close();
+		
 
 		//Get the md5 checksum
 		byte[] bytes = digest.digest();
