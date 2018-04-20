@@ -92,20 +92,22 @@ public class FileTransferMain {
 			System.out.println("The file requested has been found");
 			String fileExists = "The file requested has been found";
 			server.sendString(fileExists);
+			//This is where file will split
+			FileInputStream fis = new FileInputStream(input);
+			byte[] byteArray = new byte[1024];
+			int bytesCount = 0;
+
+			int packets = (int) Math.ceil(fis.available()/1024);
+			server.sendInt(packets);
+
+			while ((bytesCount = fis.read(byteArray)) != -1) {
+				server.sendBytes(byteArray);
+			}
+			fis.close();
 		}
-		//This is where file will split
-		FileInputStream fis = new FileInputStream(input);
-		byte[] byteArray = new byte[1024];
-		int bytesCount = 0;
-		
-		int packets = (int) Math.ceil(fis.available()/1024);
-		server.sendInt(packets);
-		
-		while ((bytesCount = fis.read(byteArray)) != -1) {
-			server.sendBytes(byteArray);
+		else{
+			server.sendString("The file requested was not found");
 		}
-		fis.close();
-		
 	}
 
 	public static void client() throws IOException {
