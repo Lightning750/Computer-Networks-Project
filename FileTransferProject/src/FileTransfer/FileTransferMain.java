@@ -89,6 +89,7 @@ public class FileTransferMain {
 		String fileName = server.receiveString();
 		File input = new File(fileName);
 		if(!input.exists()){
+			server.sendInt(1);
 			System.out.println("The file requested has been found");
 			String fileExists = "The file requested has been found";
 			server.sendString(fileExists);
@@ -101,11 +102,12 @@ public class FileTransferMain {
 			server.sendInt(packets);
 
 			while ((bytesCount = fis.read(byteArray)) != -1) {
-				server.sendBytes(byteArray);
+				server.sendBytes(byteArray, bytesCount);
 			}
 			fis.close();
 		}
 		else{
+			server.sendInt(0);
 			server.sendString("The file requested was not found");
 		}
 	}
@@ -133,22 +135,23 @@ public class FileTransferMain {
 		String File = FileName.nextLine();
 		client.sendString(File);
 		int ack = client.receiveInt();
+		String message = client.receiveString();
 		if (ack ==1)
 		{
-			int CheckSum = client.receiveInt();
+			int CheckSum = client.receiveInt();			
+			
+			int fileLength = client.receiveInt();
+			for (int i=0; i<fileLength; i+=1000)
+			{
+				client.receiveBytes();
+			}
+			client.receiveBytes();
 		}
 		else
 		{
-			//TODO
+			client.receiveString();
 			
 		}
-		int fileLength = client.receiveInt();
-		int lastPacket = fileLength % Network.PACKET_SIZE;
-		for (int i=0; i<fileLength; i+=1000)
-		{
-			client.receiveBytes();
-		}
-		client.receiveBytes();
 	}
 	
 	private static String getFileChecksum(File file) throws IOException, NoSuchAlgorithmException {
