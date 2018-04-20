@@ -8,6 +8,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Scanner;
 
 public class FileTransferServer {
 	private Network.Protocol protocol; 
@@ -125,7 +126,7 @@ public class FileTransferServer {
 			return string;
 		case TCP:
 		default:
-			string = readBuffer.readUTF();
+			//string = readBuffer.readLine();
 			return string	;		
 		}
 	}
