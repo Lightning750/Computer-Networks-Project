@@ -8,6 +8,8 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.time.Duration;
 import java.util.Scanner;
 
 public class FileTransferServer {
@@ -19,6 +21,7 @@ public class FileTransferServer {
 	private InetAddress clientIP;
 	private DataOutputStream writeBuffer;
 	private DataInputStream readBuffer;
+	private ByteBuffer byteBuffer;
 
 	FileTransferServer(Network.Protocol p, int port) throws IOException {
 		protocol = p;
@@ -60,7 +63,11 @@ public class FileTransferServer {
 	public void sendInt(int data) throws IOException {
 		switch(protocol) {
 		case UDP:
-			
+			byteBuffer = ByteBuffer.allocate(4);
+			byteBuffer.putInt(data);
+			DatagramPacket intPacket = 
+				new DatagramPacket(byteBuffer.array(), 4, clientIP, port);
+			UDP_Socket.send(intPacket);			
 			break;
 		case TCP:
 		default:
@@ -69,16 +76,18 @@ public class FileTransferServer {
 		}
 	}
 	
-	public void sendBytes(byte[] byteArray) throws IOException {
+	public void sendBytes(byte[] byteArray, int length) throws IOException {
 		switch(protocol) {
 		case UDP:
-			
+			DatagramPacket bytePacket =
+				new DatagramPacket(byteArray, 0, length, clientIP, port);
+			UDP_Socket.send(bytePacket);
 			break;
 		case TCP:
 		default:
-			writeBuffer.writeInt(byteArray.length);
-			writeBuffer.write(byteArray);
-			break;			
+			writeBuffer.writeInt(length);
+			writeBuffer.write(byteArray, 0, length);
+			break;
 		}
 	}
 	
@@ -89,7 +98,7 @@ public class FileTransferServer {
 			break;
 		case TCP:
 		default:
-			writeBuffer.writeChars(message);
+			writeBuffer.writeUTF(message);
 			break;			
 		}
 	}
@@ -101,7 +110,7 @@ public class FileTransferServer {
 			return data;
 		case TCP:
 		default:
-			readBuffer.readInt();
+			data = readBuffer.readInt();
 			return data;	
 		}
 	}
@@ -115,7 +124,7 @@ public class FileTransferServer {
 		default:
 			int length = receiveInt();
 			readBuffer.readFully(byteArray, 0, length);
-			return byteArray;		
+			return byteArray;
 		}
 	}
 	
@@ -126,8 +135,8 @@ public class FileTransferServer {
 			return string;
 		case TCP:
 		default:
-			//string = readBuffer.readLine();
-			return string	;		
+			string = readBuffer.readUTF();
+			return string;		
 		}
 	}
 }
