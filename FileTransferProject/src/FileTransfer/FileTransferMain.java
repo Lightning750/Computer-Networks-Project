@@ -102,6 +102,7 @@ public class FileTransferMain {
 			
 			//calculate and send checksum
 			String checkSum = getFileChecksum(input);
+			server.sendString(checkSum);
 			
 			//setup file transfer
 			FileInputStream fis = new FileInputStream(input);
