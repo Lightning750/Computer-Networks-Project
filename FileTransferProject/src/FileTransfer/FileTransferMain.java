@@ -90,7 +90,7 @@ public class FileTransferMain {
 		
 		String fileName = server.receiveString();
 		File input = new File(fileName);
-		if(!input.exists()){
+		if(input.exists()){
 			//send ACK
 			server.sendInt(1);
 			String fileExists = "The file requested has been found";
@@ -144,6 +144,7 @@ public class FileTransferMain {
 		Scanner scanner = new Scanner(System.in);
 		String IPAddress = scanner.nextLine();
 		InetAddress serverAddress = InetAddress.getByName(IPAddress);
+		System.out.print("Connecting...");
 		client.beginConnection(serverAddress);	
 		System.out.println("Connection confirmed");
 		
@@ -157,9 +158,10 @@ public class FileTransferMain {
 		System.out.println(message);
 		if (ack ==1)
 		{
-			String CheckSum = client.receiveString();
-			
+			//send confirmation back to server
 			client.sendInt(ack);
+			//receive checksum
+			String CheckSum = client.receiveString();
 		
 			int packetNum = client.receiveInt();
 			ArrayList<byte[]> fileBuffer = new ArrayList<byte[]>(packetNum);
