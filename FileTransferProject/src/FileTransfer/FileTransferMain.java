@@ -111,7 +111,7 @@ public class FileTransferMain {
 			int packetNum = 0;
 
 			//send expected number of packets
-			int packets = (int) Math.ceil(fis.available()/1024);
+			int packets = (int) Math.ceil((double)fis.available()/1024);
 			server.sendInt(packets);
 			
 			//send file 1024 bytes at a time
