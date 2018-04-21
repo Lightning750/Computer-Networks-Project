@@ -13,9 +13,9 @@ import java.util.ArrayList;
 
 public class FileTransferServer {
 	private Network.Protocol protocol; 
-	private DatagramSocket UDP_Socket;
-	private ServerSocket TCP_ServerSocket;
-	private Socket TCP_Socket;
+	private DatagramSocket udpSocket;
+	private ServerSocket tcpServerSocket;
+	private Socket tcpSocket;
 	private int port;
 	private InetAddress clientIP;
 	private DataOutputStream writeBuffer;
@@ -28,11 +28,11 @@ public class FileTransferServer {
 		this.port = port;
 		switch(protocol) {
 		case UDP:
-			UDP_Socket = new DatagramSocket(port);
+			udpSocket = new DatagramSocket(port);
 			break;
 		case TCP:
 		default:
-			TCP_ServerSocket = new ServerSocket(port);
+			tcpServerSocket = new ServerSocket(port);
 			break;			
 		}
 	}
@@ -40,22 +40,23 @@ public class FileTransferServer {
 	public void acceptConnection() throws IOException {
 		switch(protocol) {
 		case UDP:
-			UDP_Socket.setSoTimeout(Network.TIMEOUT);
+			udpSocket.setSoTimeout(Network.TIMEOUT);
 			byte[] connectionBuffer = null;
 			DatagramPacket connectionPacket = 
 					new DatagramPacket(connectionBuffer, 8);
-			UDP_Socket.receive(connectionPacket);
-			UDP_Socket.send(connectionPacket);
-			UDP_Socket.receive(connectionPacket);
+			udpSocket.receive(connectionPacket);
+			udpSocket.send(connectionPacket);
+			udpSocket.receive(connectionPacket);
 			clientIP = connectionPacket.getAddress();
+			udpSocket.connect(clientIP, port);
 			break;
 		case TCP:
 		default:
-			TCP_ServerSocket.setSoTimeout(Network.TIMEOUT);
-			TCP_Socket = TCP_ServerSocket.accept();
-			clientIP = TCP_Socket.getInetAddress();
-			writeBuffer = new DataOutputStream(TCP_Socket.getOutputStream());
-			readBuffer = new DataInputStream(TCP_Socket.getInputStream());
+			tcpServerSocket.setSoTimeout(Network.TIMEOUT);
+			tcpSocket = tcpServerSocket.accept();
+			clientIP = tcpSocket.getInetAddress();
+			writeBuffer = new DataOutputStream(tcpSocket.getOutputStream());
+			readBuffer = new DataInputStream(tcpSocket.getInputStream());
 			break;
 		}
 	}
@@ -68,7 +69,7 @@ public class FileTransferServer {
 			byteBuffer.putInt(data);
 			DatagramPacket intPacket = 
 				new DatagramPacket(byteBuffer.array(), 4, clientIP, port);
-			UDP_Socket.send(intPacket);
+			udpSocket.send(intPacket);
 			break;
 		case TCP:
 		default:
@@ -85,7 +86,7 @@ public class FileTransferServer {
 			byteBuffer.put(byteArray, 0, length);
 			DatagramPacket bytePacket =
 				new DatagramPacket(byteBuffer.array(), 0, length + 1, clientIP, port);
-			UDP_Socket.send(bytePacket);
+			udpSocket.send(bytePacket);
 			break;
 		case TCP:
 		default:
@@ -105,7 +106,7 @@ public class FileTransferServer {
 			byteBuffer.put(byteArray, 0, length);
 			DatagramPacket stringPacket =
 				new DatagramPacket(byteBuffer.array(), length + 1, clientIP, port);
-			UDP_Socket.send(stringPacket);
+			udpSocket.send(stringPacket);
 			break;
 		case TCP:
 		default:
@@ -118,7 +119,7 @@ public class FileTransferServer {
 		int data = 0;
 		switch(protocol) {
 		case UDP:
-			byte[] byteArray = UDP_receiveType(Network.intID);
+			byte[] byteArray = udpReceiveType(Network.intID);
 			byteBuffer = ByteBuffer.wrap(byteArray, 1, 4);
 			data = byteBuffer.getInt();
 			return data;
@@ -133,7 +134,7 @@ public class FileTransferServer {
 		byte[] byteArray;
 		switch(protocol) {
 		case UDP:
-			byteArray = UDP_receiveType(Network.byteID);
+			byteArray = udpReceiveType(Network.byteID);
 			byteBuffer = ByteBuffer.wrap(byteArray, 1, byteArray.length - 1);
 			byteArray = new byte[byteArray.length - 1];
 			byteBuffer.get(byteArray);
@@ -151,7 +152,7 @@ public class FileTransferServer {
 		String string = null;
 		switch(protocol) {
 		case UDP:
-			byte[] byteArray = UDP_receiveType(Network.stringID);
+			byte[] byteArray = udpReceiveType(Network.stringID);
 			byteBuffer = ByteBuffer.wrap(byteArray, 1, byteArray.length - 1);
 			string = new String(byteBuffer.array());
 			return string;
@@ -162,7 +163,7 @@ public class FileTransferServer {
 		}
 	}
 	
-	private byte[] UDP_receiveType(byte t) throws IOException {
+	private byte[] udpReceiveType(byte t) throws IOException {
 		for(int i = 0; i < datagramStorage.size(); i++) {
 			if (datagramStorage.get(i)[0] == t) {
 				byte[] b = datagramStorage.get(i);
@@ -173,7 +174,7 @@ public class FileTransferServer {
 		for(int i = 0; i < 5; i++) {
 			DatagramPacket newPacket = 
 					new DatagramPacket(new byte[2048], 2048);
-			UDP_Socket.receive(newPacket);
+			udpSocket.receive(newPacket);
 			byte[] b = new byte[newPacket.getLength()];
 			b = newPacket.getData();
 			if (b[0] == t) return b;

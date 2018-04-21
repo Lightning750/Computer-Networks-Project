@@ -13,12 +13,10 @@ public class FileTransferMain {
 	private static Network.Protocol protocol;
 
 	public static void main(String[] args) throws IOException {
-
 		//Displays IP Address
 		InetAddress inetAddress = InetAddress.getLocalHost();
 		System.out.println("IP Address:- " + inetAddress.getHostAddress());
 		System.out.println("Host Name:- " + inetAddress.getHostName());
-
 
 		Scanner input = new Scanner(System.in);
 		int userPrompt = 0;
@@ -45,6 +43,7 @@ public class FileTransferMain {
 				}
 			}
 		}
+		
 		userPrompt = 0;
 		while (userPrompt == 0){
 			System.out.println("Would you like to be the client or server?");
