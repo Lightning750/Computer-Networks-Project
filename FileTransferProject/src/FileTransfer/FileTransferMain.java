@@ -78,6 +78,7 @@ public class FileTransferMain {
 			server = new FileTransferServer(protocol, Network.TCP_PORT);
 			break;
 		}
+		
 		System.out.print("Enter any character if you are ready to start the connection: ");
 		Scanner connection = new Scanner(System.in);
 		while(!connection.hasNext());
@@ -89,18 +90,21 @@ public class FileTransferMain {
 		File input = new File(fileName);
 		if(!input.exists()){
 			server.sendInt(1);
-			System.out.println("The file requested has been found");
+			
 			String fileExists = "The file requested has been found";
+			System.out.println(fileExists);
 			server.sendString(fileExists);
+			
 			//This is where file will split
 			FileInputStream fis = new FileInputStream(input);
-			byte[] byteArray = new byte[1024];
+			byte[] byteArray = new byte[2048];
 			int bytesCount = 0;
+			int packetNum = 0;
 
 			int packets = (int) Math.ceil(fis.available()/1024);
 			server.sendInt(packets);
 
-			while ((bytesCount = fis.read(byteArray)) != -1) {
+			while ((bytesCount = fis.read(byteArray, 4, 1024)) != -1) {
 				server.sendBytes(byteArray, bytesCount);
 			}
 			fis.close();
@@ -130,7 +134,7 @@ public class FileTransferMain {
 		
 		//Prompts user to enter file name. 
 		Scanner FileName = new Scanner(System.in);
-		System.out.print("Enter file name");
+		System.out.print("Enter file name: ");
 		String File = FileName.nextLine();
 		client.sendString(File);
 		int ack = client.receiveInt();
