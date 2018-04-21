@@ -1,3 +1,4 @@
 
-FileTransferProject/src/UTD.jpg
-FileTransferProject/src/test.txt
+*.jpg
+FileTransferProject/bin/test.txt
+*.txt
