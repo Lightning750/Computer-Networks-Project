@@ -124,6 +124,9 @@ public class FileTransferMain {
 				server.sendBytes(byteArray, bytesCount + 4);
 				packetNum++;
 			}
+			System.out.println("File sent");
+			server.receiveInt();
+			server.sendInt(1);
 			fis.close();
 			scanner.close();
 		}
@@ -182,6 +185,9 @@ public class FileTransferMain {
 			for (int i=0; i<packetNum; i++){
 				fos.write(fileBuffer.get(i));
 			}
+			System.out.println("Recieved file");
+			client.sendInt(1);
+			client.receiveInt();
 			fos.close();
 			scanner.close();
 		}
