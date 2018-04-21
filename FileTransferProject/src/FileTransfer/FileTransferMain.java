@@ -116,10 +116,13 @@ public class FileTransferMain {
 			
 			//send file 1024 bytes at a time
 			while ((bytesCount = fis.read(byteArray, 4, 1024)) != -1) {
-				byteBuffer = ByteBuffer.allocate(1024 + 4);
+				byteBuffer = ByteBuffer.allocate(2048);
 				byteBuffer.putInt(packetNum);
-				byteBuffer.put(byteArray);
-				server.sendBytes(byteBuffer.array(), bytesCount);
+				byteBuffer.put(byteArray, 0, bytesCount);
+				byteBuffer.rewind();
+				byteBuffer.get(byteArray, 0, bytesCount + 4);
+				server.sendBytes(byteArray, bytesCount + 4);
+				packetNum++;
 			}
 			fis.close();
 			scanner.close();
