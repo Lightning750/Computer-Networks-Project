@@ -2,15 +2,19 @@ package FileTransfer;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Scanner;
 import java.net.InetAddress;
+import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 public class FileTransferMain {
 
 	private static Network.Protocol protocol;
+	private static ByteBuffer byteBuffer;
 
 	public static void main(String[] args) throws IOException {
 		//Displays IP Address
@@ -137,18 +141,31 @@ public class FileTransferMain {
 		System.out.print("Enter file name: ");
 		String File = FileName.nextLine();
 		client.sendString(File);
+		
 		int ack = client.receiveInt();
 		String message = client.receiveString();
 		if (ack ==1)
 		{
-			int CheckSum = client.receiveInt();			
+			String CheckSum = client.receiveString();
 			
-			int fileLength = client.receiveInt();
-			for (int i=0; i<fileLength; i+=1000)
+			client.sendInt(ack);
+		
+			int packetNum = client.receiveInt();
+			ArrayList<byte[]> fileBuffer = new ArrayList<byte[]>(packetNum);
+			byte[] packet = new byte[1024];
+			
+			for (int i=0; i<packetNum; i++)
 			{
-				client.receiveBytes();
+				byteBuffer = ByteBuffer.wrap(client.receiveBytes());
+				int index = byteBuffer.getInt();
+				byteBuffer.get(packet, 0, byteBuffer.remaining());
+				fileBuffer.add(index, packet);				
 			}
-			client.receiveBytes();
+			
+			FileOutputStream fos = new FileOutputStream(File);
+			for (int i=0; i<packetNum; i++){
+				fos.write(fileBuffer.get(i));
+			}
 		}
 		else
 		{
