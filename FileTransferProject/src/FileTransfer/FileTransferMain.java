@@ -56,12 +56,10 @@ public class FileTransferMain {
 			if (userPrompt == 1){
 				System.out.println("You have selected Client" );
 				client();
-				return;
 			}
 			else if (userPrompt == 2){
 				System.out.println("You have selected Server");
 				server();
-				return;
 			}
 			else{
 				System.out.println("You have not selected a valid response" );
@@ -84,8 +82,8 @@ public class FileTransferMain {
 		}
 		
 		System.out.print("Enter any character if you are ready to start the connection: ");
-		Scanner connection = new Scanner(System.in);
-		while(!connection.hasNext());
+		Scanner scanner = new Scanner(System.in);
+		while(!scanner.hasNext());
 		System.out.println("Connecting...");
 		server.acceptConnection();
 		System.out.println("Connection confirmed");
@@ -93,25 +91,37 @@ public class FileTransferMain {
 		String fileName = server.receiveString();
 		File input = new File(fileName);
 		if(!input.exists()){
+			//send ACK
 			server.sendInt(1);
-			
 			String fileExists = "The file requested has been found";
 			System.out.println(fileExists);
 			server.sendString(fileExists);
 			
-			//This is where file will split
+			//wait for ACK from client
+			server.receiveInt();
+			
+			//calculate and send checksum
+			String checkSum = getFileChecksum(input);
+			
+			//setup file transfer
 			FileInputStream fis = new FileInputStream(input);
 			byte[] byteArray = new byte[2048];
 			int bytesCount = 0;
 			int packetNum = 0;
 
+			//send expected number of packets
 			int packets = (int) Math.ceil(fis.available()/1024);
 			server.sendInt(packets);
-
+			
+			//send file 1024 bytes at a time
 			while ((bytesCount = fis.read(byteArray, 4, 1024)) != -1) {
-				server.sendBytes(byteArray, bytesCount);
+				byteBuffer = ByteBuffer.allocate(1024 + 4);
+				byteBuffer.putInt(packetNum);
+				byteBuffer.put(byteArray);
+				server.sendBytes(byteBuffer.array(), bytesCount);
 			}
 			fis.close();
+			scanner.close();
 		}
 		else{
 			server.sendInt(0);
@@ -130,20 +140,20 @@ public class FileTransferMain {
 			client = new FileTransferClient(protocol, Network.TCP_PORT);
 		}
 		System.out.print("Enter the IP Address you would like to connect to: ");
-		Scanner IPConnect = new Scanner(System.in);
-		String IPAddress = IPConnect.nextLine();
+		Scanner scanner = new Scanner(System.in);
+		String IPAddress = scanner.nextLine();
 		InetAddress serverAddress = InetAddress.getByName(IPAddress);
 		client.beginConnection(serverAddress);	
 		System.out.println("Connection confirmed");
 		
-		//Prompts user to enter file name. 
-		Scanner FileName = new Scanner(System.in);
+		//Prompts user to enter file name.
 		System.out.print("Enter file name: ");
-		String File = FileName.nextLine();
+		String File = scanner.nextLine();
 		client.sendString(File);
 		
 		int ack = client.receiveInt();
 		String message = client.receiveString();
+		System.out.println(message);
 		if (ack ==1)
 		{
 			String CheckSum = client.receiveString();
@@ -166,6 +176,8 @@ public class FileTransferMain {
 			for (int i=0; i<packetNum; i++){
 				fos.write(fileBuffer.get(i));
 			}
+			fos.close();
+			scanner.close();
 		}
 		else
 		{
@@ -174,8 +186,14 @@ public class FileTransferMain {
 		}
 	}
 	
-	private static String getFileChecksum(File file) throws IOException, NoSuchAlgorithmException {
-		MessageDigest digest = MessageDigest.getInstance("MD5");
+	private static String getFileChecksum(File file) throws IOException {
+		MessageDigest digest;
+		try {
+			digest = MessageDigest.getInstance("MD5");
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+			return null;
+		}
 		FileInputStream fis = new FileInputStream(file);
 		byte[] byteArray = new byte[1024];
 		int bytesCount = 0;
