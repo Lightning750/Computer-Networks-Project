@@ -8,6 +8,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
@@ -41,6 +42,7 @@ public class FileTransferClient {
 		case TCP:
 		default:
 			tcpSocket = new Socket();
+			tcpSocket.bind(new InetSocketAddress(InetAddress.getLocalHost(), port));
 			break;		
 		}
 	}
@@ -67,9 +69,8 @@ public class FileTransferClient {
 			
 		case TCP:
 		default:
-			tcpSocket = new Socket(serverIP, port, InetAddress.getLocalHost(), port);
 			tcpSocket.setSoTimeout(Network.TIMEOUT);
-			//tcpSocket.connect(new InetSocketAddress(serverIP, port), Network.TIMEOUT);
+			tcpSocket.connect(new InetSocketAddress(serverIP, port), Network.TIMEOUT);
 			writeBuffer = new DataOutputStream(tcpSocket.getOutputStream());
 			readBuffer = new DataInputStream(tcpSocket.getInputStream());
 			break;
