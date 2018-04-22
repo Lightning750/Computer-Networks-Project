@@ -232,8 +232,8 @@ public class FileTransferServer {
 			}
 		}
 		
-		//try up to 5 times to receive a packet of the correct type
-		for(int i = 0; i < 5; i++) {
+		//try up to 10 times to receive a packet of the correct type
+		for(int i = 0; i < 10; i++) {
 			//max packet size is:
 			//Network.PACKET_SIZE + 4 (int packetNum) + 1 (byte identifier)
 			int maxSize = Network.PACKET_SIZE + 5;

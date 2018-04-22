@@ -156,6 +156,7 @@ public class FileTransferMain {
 			client = new FileTransferClient(protocol, Network.TCP_PORT);
 		}
 		
+		//start connection
 		System.out.print("Enter the IP Address you would like to connect to: ");
 		input = new Scanner(System.in);
 		String IPAddress = input.nextLine();
@@ -174,7 +175,7 @@ public class FileTransferMain {
 			if(continueSending == 0) break;
 			client.sendString(fileName);
 
-			//gets ack 
+			//receive ACK
 			int ack = client.receiveInt();
 			String message = client.receiveString();
 			System.out.println(message);
