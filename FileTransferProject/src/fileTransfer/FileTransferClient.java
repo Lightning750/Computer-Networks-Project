@@ -40,7 +40,7 @@ public class FileTransferClient {
 			
 		case TCP:
 		default:
-			tcpSocket = new Socket();
+			tcpSocket = new Socket(InetAddress.getLocalHost(), port);
 			break;		
 		}
 	}
