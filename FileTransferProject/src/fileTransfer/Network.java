@@ -4,7 +4,7 @@ package fileTransfer;
 public class Network {
 	public static final int TCP_PORT = 55551;
 	public static final int UDP_PORT = 55552;
-	public static final int TIMEOUT = 15000; //15 seconds
+	public static final int TIMEOUT = 30000; //30 seconds
 	public static final int PACKET_SIZE = 1024; //for byte[] packets
 	public static enum Protocol { TCP, UDP };
 	

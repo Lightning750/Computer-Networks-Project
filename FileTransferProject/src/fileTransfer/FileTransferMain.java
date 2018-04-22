@@ -113,7 +113,7 @@ public class FileTransferMain {
 				int packets = (int) Math.ceil((double)fis.available()/1024);
 				server.sendInt(packets);
 
-				//send file 1024 bytes at a time
+				//send file
 				while ((bytesCount = fis.read(byteArray, 4, Network.PACKET_SIZE)) != -1) {
 					byteBuffer = ByteBuffer.allocate(Network.PACKET_SIZE + 4);
 					byteBuffer.putInt(packetNum);
@@ -126,8 +126,6 @@ public class FileTransferMain {
 				System.out.println("File sent");
 				String checksumConfirmation = server.receiveString();
 				System.out.println(checksumConfirmation);
-				server.receiveInt();
-				server.sendInt(1);
 				fis.close();
 			}
 			else{
@@ -136,6 +134,8 @@ public class FileTransferMain {
 				server.sendString(message);
 				System.out.println(message);
 			}
+			server.receiveInt();
+			server.sendInt(1);
 		}
 		System.out.println("Connection has been closed.");
 		server.closeConnection();
@@ -201,27 +201,31 @@ public class FileTransferMain {
 				String newCheckSum = getFileChecksum(file);
 				if(checksum.equals(newCheckSum))
 				{
-					System.out.println("Checksums match. File recieved correctly.");
-					client.sendString("Checksums match. File recieved correctly.");
+					message = "Checksums match. File recieved correctly.";
+					System.out.println(message);
+					client.sendString(message);
 				}
 				else
 				{
-					System.out.println("Checksums don't match. File corrupted.");
-					client.sendString("Checksums don't match. File corrupted.");
+					message = "Checksums don't match. File corrupted.";
+					System.out.println(message);
+					client.sendString(message);
 				}
-				client.sendInt(1);
-				client.receiveInt();
 				fos.close();
 			}
 			else
 			{
 				System.out.println("Request a different file.");
 			}
+			client.sendInt(1);
+			client.receiveInt();
 		}
 		System.out.println("Connection has been closed.");
 		client.closeConnection();
 	}
 	
+	
+	//calculates checksum using MessageDigest and the MD5 algorithm
 	private static String getFileChecksum(File file) throws IOException {
 		MessageDigest digest;
 		try {
@@ -231,10 +235,10 @@ public class FileTransferMain {
 			return null;
 		}
 		FileInputStream fis = new FileInputStream(file);
-		byte[] byteArray = new byte[1024];
+		byte[] byteArray = new byte[Network.PACKET_SIZE];
 		int bytesCount = 0;
 
-		//Read file data and update in message digest
+		//Read file data and update message digest
 		while ((bytesCount = fis.read(byteArray)) != -1) {
 			digest.update(byteArray, 0, bytesCount);
 		}
