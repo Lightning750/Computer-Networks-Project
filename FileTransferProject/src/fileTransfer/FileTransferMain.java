@@ -1,3 +1,11 @@
+/**********************************************************
+Computer Networks Project
+Amogh Singh
+Harrison Post
+
+This program sends and receives files using TCP or UDP
+
+***********************************************************/
 package fileTransfer;
 
 import java.io.File;
