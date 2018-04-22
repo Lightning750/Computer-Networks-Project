@@ -90,7 +90,7 @@ public class FileTransferMain {
 		
 		String fileName = server.receiveString();
 		File input = new File(fileName);
-		if(input.exists()){
+		if(input.exists()) {
 			//send ACK
 			server.sendInt(1);
 			String fileExists = "The file requested has been found";
@@ -106,9 +106,8 @@ public class FileTransferMain {
 			
 			//setup file transfer
 			FileInputStream fis = new FileInputStream(input);
-			byte[] byteArray = new byte[2048];
-			int bytesCount = 0;
-			int packetNum = 0;
+			byte[] byteArray = new byte[1028];
+			int bytesCount, packetNum = 0;
 
 			//send expected number of packets
 			int packets = (int) Math.ceil((double)fis.available()/1024);
@@ -116,9 +115,9 @@ public class FileTransferMain {
 			
 			//send file 1024 bytes at a time
 			while ((bytesCount = fis.read(byteArray, 4, 1024)) != -1) {
-				byteBuffer = ByteBuffer.allocate(2048);
+				byteBuffer = ByteBuffer.allocate(1028);
 				byteBuffer.putInt(packetNum);
-				byteBuffer.put(byteArray, 0, bytesCount);
+				byteBuffer.put(byteArray, 4, bytesCount);
 				byteBuffer.rewind();
 				byteBuffer.get(byteArray, 0, bytesCount + 4);
 				server.sendBytes(byteArray, bytesCount + 4);
@@ -127,12 +126,16 @@ public class FileTransferMain {
 			System.out.println("File sent");
 			server.receiveInt();
 			server.sendInt(1);
+			
+			server.closeConnection();
 			fis.close();
 			scanner.close();
 		}
 		else{
 			server.sendInt(0);
-			server.sendString("The file requested was not found");
+			String message = "The file requested was not found";
+			server.sendString(message);
+			System.out.println(message);
 		}
 	}
 
@@ -150,7 +153,7 @@ public class FileTransferMain {
 		Scanner scanner = new Scanner(System.in);
 		String IPAddress = scanner.nextLine();
 		InetAddress serverAddress = InetAddress.getByName(IPAddress);
-		System.out.print("Connecting...");
+		System.out.println("Connecting...");
 		client.beginConnection(serverAddress);	
 		System.out.println("Connection confirmed");
 		
@@ -162,38 +165,41 @@ public class FileTransferMain {
 		int ack = client.receiveInt();
 		String message = client.receiveString();
 		System.out.println(message);
-		if (ack ==1)
+		if (ack == 1)
 		{
 			//send confirmation back to server
 			client.sendInt(ack);
 			//receive checksum
 			String CheckSum = client.receiveString();
 		
-			int packetNum = client.receiveInt();
+			int packetNum = client.receiveInt(), index;
 			ArrayList<byte[]> fileBuffer = new ArrayList<byte[]>(packetNum);
-			byte[] packet = new byte[1024];
+			byte[] packet, data;
 			
 			for (int i=0; i<packetNum; i++)
 			{
-				byteBuffer = ByteBuffer.wrap(client.receiveBytes());
-				int index = byteBuffer.getInt();
-				byteBuffer.get(packet, 0, byteBuffer.remaining());
-				fileBuffer.add(index, packet);				
+				packet = client.receiveBytes();
+				byteBuffer = ByteBuffer.wrap(packet);
+				index = byteBuffer.getInt();
+				data = new byte[byteBuffer.remaining()];
+				byteBuffer.get(data, 0, byteBuffer.remaining());
+				fileBuffer.add(index, data);			
 			}
 			
 			FileOutputStream fos = new FileOutputStream(File);
-			for (int i=0; i<packetNum; i++){
-				fos.write(fileBuffer.get(i));
-			}
-			System.out.println("Recieved file");
+			for(byte[] b : fileBuffer) fos.write(b);
+			
+			System.out.println("Received file");
 			client.sendInt(1);
 			client.receiveInt();
+			
+			client.closeConnection();
 			fos.close();
 			scanner.close();
 		}
 		else
 		{
-			client.receiveString();
+			client.closeConnection();
 			
 		}
 	}
