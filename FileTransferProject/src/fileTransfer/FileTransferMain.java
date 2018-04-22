@@ -106,7 +106,7 @@ public class FileTransferMain {
 
 				//setup file transfer
 				FileInputStream fis = new FileInputStream(input);
-				byte[] byteArray = new byte[1028];
+				byte[] byteArray = new byte[Network.PACKET_SIZE + 4];
 				int bytesCount, packetNum = 0;
 
 				//send expected number of packets
@@ -114,8 +114,8 @@ public class FileTransferMain {
 				server.sendInt(packets);
 
 				//send file 1024 bytes at a time
-				while ((bytesCount = fis.read(byteArray, 4, 1024)) != -1) {
-					byteBuffer = ByteBuffer.allocate(1028);
+				while ((bytesCount = fis.read(byteArray, 4, Network.PACKET_SIZE)) != -1) {
+					byteBuffer = ByteBuffer.allocate(Network.PACKET_SIZE + 4);
 					byteBuffer.putInt(packetNum);
 					byteBuffer.put(byteArray, 4, bytesCount);
 					byteBuffer.rewind();
@@ -160,11 +160,12 @@ public class FileTransferMain {
 		int continueSending = 1;
 		
 		while(continueSending == 1) {
-			//Prompts user to enter file name.
-			System.out.print("Enter file name: ");
+			//Prompts user to enter file name or quit.
+			System.out.print("Enter file  or \"exit\" to quit: ");
 			String File = input.nextLine();
-			
+			if(File == "exit") continueSending = 0;
 			client.sendInt(continueSending);
+			if(continueSending == 0) break;
 			client.sendString(File);
 
 			int ack = client.receiveInt();
@@ -204,6 +205,7 @@ public class FileTransferMain {
 				System.out.println("Request a different file.");
 			}
 		}
+		System.out.println("Connection Closed");
 		client.closeConnection();
 	}
 	
