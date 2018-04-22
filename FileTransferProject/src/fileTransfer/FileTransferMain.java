@@ -211,7 +211,7 @@ public class FileTransferMain {
 				String newCheckSum = getFileChecksum(file);
 				if(checksum.equals(newCheckSum))
 				{
-					message = "Checksums match. File recieved correctly.";
+					message = "Checksums match. File received correctly.";
 					System.out.println(message);
 					client.sendString(message);
 				}
