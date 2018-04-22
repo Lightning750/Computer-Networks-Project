@@ -101,8 +101,8 @@ public class FileTransferMain {
 				server.receiveInt();
 
 				//calculate and send checksum
-				String checkSum = getFileChecksum(input);
-				server.sendString(checkSum);
+				String checksum = getFileChecksum(input);
+				server.sendString(checksum);
 
 				//setup file transfer
 				FileInputStream fis = new FileInputStream(input);
@@ -124,13 +124,15 @@ public class FileTransferMain {
 					packetNum++;
 				}
 				System.out.println("File sent");
+				String checksumConfirmation = server.receiveString();
+				System.out.println(checksumConfirmation);
 				server.receiveInt();
 				server.sendInt(1);
 				fis.close();
 			}
 			else{
 				server.sendInt(0);
-				String message = "The file requested was not found";
+				String message = "The file requested was not found.";
 				server.sendString(message);
 				System.out.println(message);
 			}
@@ -162,11 +164,11 @@ public class FileTransferMain {
 		while(continueSending == 1) {
 			//Prompts user to enter file name or quit.
 			System.out.print("Enter file  or \"exit\" to quit: ");
-			String File = input.nextLine();
-			if(File.equals("exit")) continueSending = 0;
+			String fileName = input.nextLine();
+			if(fileName.equals("exit")) continueSending = 0;
 			client.sendInt(continueSending);
 			if(continueSending == 0) break;
-			client.sendString(File);
+			client.sendString(fileName);
 
 			int ack = client.receiveInt();
 			String message = client.receiveString();
@@ -176,7 +178,7 @@ public class FileTransferMain {
 				//send confirmation back to server
 				client.sendInt(ack);
 				//receive checksum
-				String CheckSum = client.receiveString();
+				String checksum = client.receiveString();
 
 				int packetNum = client.receiveInt(), index;
 				ArrayList<byte[]> fileBuffer = new ArrayList<byte[]>(packetNum);
@@ -191,11 +193,22 @@ public class FileTransferMain {
 					byteBuffer.get(data, 0, byteBuffer.remaining());
 					fileBuffer.add(index, data);			
 				}
-
-				FileOutputStream fos = new FileOutputStream(File);
+				File file = new File(fileName);
+				FileOutputStream fos = new FileOutputStream(file);
 				for(byte[] b : fileBuffer) fos.write(b);
 
 				System.out.println("Received file");
+				String newCheckSum = getFileChecksum(file);
+				if(checksum.equals(newCheckSum))
+				{
+					System.out.println("Checksums match. File recieved correctly.");
+					client.sendString("Checksums match. File recieved correctly.");
+				}
+				else
+				{
+					System.out.println("Checksums don't match. File corrupted.");
+					client.sendString("Checksums don't match. File corrupted.");
+				}
 				client.sendInt(1);
 				client.receiveInt();
 				fos.close();
