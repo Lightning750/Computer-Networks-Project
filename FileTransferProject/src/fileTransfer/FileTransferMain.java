@@ -163,7 +163,7 @@ public class FileTransferMain {
 			//Prompts user to enter file name or quit.
 			System.out.print("Enter file  or \"exit\" to quit: ");
 			String File = input.nextLine();
-			if(File == "exit") continueSending = 0;
+			if(File.equals("exit")) continueSending = 0;
 			client.sendInt(continueSending);
 			if(continueSending == 0) break;
 			client.sendString(File);
@@ -205,7 +205,7 @@ public class FileTransferMain {
 				System.out.println("Request a different file.");
 			}
 		}
-		System.out.println("Connection Closed");
+		System.out.println("Connection has been closed.");
 		client.closeConnection();
 	}
 	
