@@ -78,12 +78,14 @@ public class FileTransferMain {
 			break;
 		}
 		
+		//Prompt user to start connection
 		System.out.print("Enter any character if you are ready to start the connection: ");
 		while(!input.hasNext());
 		System.out.println("Connecting...");
 		server.acceptConnection();
 		System.out.println("Connection confirmed");
 		
+		//While loop to keep asking for a file name until user wants to exit
 		int continueReceiving = 1;
 		while((continueReceiving = server.receiveInt()) != 0) {
 			System.out.println("Client is selecting a file");
@@ -123,11 +125,13 @@ public class FileTransferMain {
 					server.sendBytes(byteArray, 0, bytesCount + 4);
 					packetNum++;
 				}
+				//Confirm file was sent and confirm checksum was correct
 				System.out.println("File sent");
 				String checksumConfirmation = server.receiveString();
 				System.out.println(checksumConfirmation);
 				fis.close();
 			}
+			//Give error message of file not being sent
 			else{
 				server.sendInt(0);
 				String message = "The file requested was not found.";
@@ -170,6 +174,7 @@ public class FileTransferMain {
 			if(continueSending == 0) break;
 			client.sendString(fileName);
 
+			//gets ack 
 			int ack = client.receiveInt();
 			String message = client.receiveString();
 			System.out.println(message);
@@ -180,10 +185,13 @@ public class FileTransferMain {
 				//receive checksum
 				String checksum = client.receiveString();
 
+				//creates arrayList of the packets
 				int packetNum = client.receiveInt(), index;
 				ArrayList<byte[]> fileBuffer = new ArrayList<byte[]>(packetNum);
 				byte[] packet, data;
 
+				//stores bytes from each packet into fileBuffer
+				//packets are stored in correct order using index
 				for (int i=0; i<packetNum; i++)
 				{
 					packet = client.receiveBytes();
@@ -195,8 +203,10 @@ public class FileTransferMain {
 				}
 				File file = new File(fileName);
 				FileOutputStream fos = new FileOutputStream(file);
+				//builds file from fileBuffers
 				for(byte[] b : fileBuffer) fos.write(b);
 
+				//confirms file received and correct checksum
 				System.out.println("Received file");
 				String newCheckSum = getFileChecksum(file);
 				if(checksum.equals(newCheckSum))
