@@ -40,7 +40,7 @@ public class FileTransferClient {
 			
 		case TCP:
 		default:
-			tcpSocket = new Socket(InetAddress.getLocalHost(), port);
+			tcpSocket = new Socket();
 			break;		
 		}
 	}
@@ -67,8 +67,9 @@ public class FileTransferClient {
 			
 		case TCP:
 		default:
+			tcpSocket = new Socket(serverIP, port, InetAddress.getLocalHost(), port);
 			tcpSocket.setSoTimeout(Network.TIMEOUT);
-			tcpSocket.connect(new InetSocketAddress(serverIP, port), Network.TIMEOUT);
+			//tcpSocket.connect(new InetSocketAddress(serverIP, port), Network.TIMEOUT);
 			writeBuffer = new DataOutputStream(tcpSocket.getOutputStream());
 			readBuffer = new DataInputStream(tcpSocket.getInputStream());
 			break;
